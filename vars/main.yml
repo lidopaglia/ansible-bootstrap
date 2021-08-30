@@ -1,0 +1,4 @@
+---
+ssh_users: "lido ansible"
+ssh_template_file: sshd_config.j2
+ssh_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFZpODCPeONHU2S9X9TiPz9eub2fnfN7dWPM3FUVkFrW ansible"

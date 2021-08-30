@@ -1,0 +1,50 @@
+---
+- hosts: all
+  become: true
+  pre_tasks:
+  - name: update repository cache & install updates
+    tags: always
+    apt:
+      upgrade: dist
+      update_cache: true
+      autoremove: true
+    changed_when: false
+    when: ansible_os_family == "Debian"
+
+- hosts: all
+  become: true
+  vars_files:
+    - ./vars/main.yml
+  handlers:
+    - name: restart_sshd
+      service:
+        name: sshd
+        state: restarted
+  tasks:
+    - name: create the ansible user
+      tags: always
+      user:
+        name: ansible
+        groups: root
+    - name: add ssh key for the ansible user
+      tags: always
+      authorized_key:
+        user: ansible
+        key: "{{ ssh_key }}"
+    - name: add custom sudoers file
+      tags: always
+      copy:
+        src: sudoer_ansible
+        dest: /etc/sudoers.d/ansible
+        owner: root
+        group: root
+        mode: 0440
+    - name: add custom sshd_config file
+      tags: ssh
+      template:
+        src: "{{ ssh_template_file }}"
+        dest: /etc/ssh/sshd_config
+        owner: root
+        group: root
+        mode: 0644
+      notify: restart_sshd
